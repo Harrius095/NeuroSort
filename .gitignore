@@ -32,8 +32,9 @@ data/logs/movimientos.csv
 .idea/
 
 # === Archivos de prueba ===
+data/imagenes_base/
 *.jpeg
 *.jpg
-data/imagenes_base/
 
-
+# === Carpetas de imágenes clasificadas (por personaje) ===
+data/personajes/
