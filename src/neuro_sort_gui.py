@@ -38,11 +38,78 @@ def listar_carpetas():
         lista = "\n".join(carpetas)
         messagebox.showinfo("Carpetas existentes", lista)
 
+def mover_imagen_manual():
+    archivos = filedialog.askopenfilenames(
+        initialdir=CARPETA_BASE,
+        title="Selecciona una o más imágenes",
+        filetypes=[("Imágenes", "*.png *.jpg *.jpeg")])
+    
+
+    
+    if not archivos:
+        return
+
+    carpetas = os.listdir(CARPETA_PERSONAJES)
+    if not carpetas:
+        messagebox.showwarning("Sin carpetas", "Primero debes crear al menos una carpeta de personaje.")
+        return
+
+    moved_count = 0
+
+    for archivo in archivos:
+        try:
+            img = Image.open(archivo)
+            img.thumbnail((400, 400))
+            img_tk = ImageTk.PhotoImage(img)
+
+            preview = tk.Toplevel(root)
+            preview.title(f"Vista previa - {os.path.basename(archivo)}")
+
+            tk.Label(preview, text=os.path.basename(archivo), font=("Arial", 12)).pack(pady=5)
+            panel = tk.Label(preview, image=img_tk)
+            panel.image = img_tk
+            panel.pack()
+
+            tk.Label(preview, text="Selecciona carpeta de destino:").pack(pady=5)
+
+            var = tk.StringVar(preview)
+            var.set(carpetas[0])
+            dropdown = tk.OptionMenu(preview, var, *carpetas)
+            dropdown.pack(pady=5)
+
+            resultado = {"mover": False}
+
+            def mover():
+                resultado["mover"] = True
+                preview.destroy()
+
+            def saltar():
+                resultado["mover"] = False
+                preview.destroy()
+
+            boton_mover = tk.Button(preview, text="Mover imagen", command=mover)
+            boton_mover.pack(side="left", padx=20, pady=10)
+
+            boton_saltar = tk.Button(preview, text="Saltar", command=saltar)
+            boton_saltar.pack(side="right", padx=20, pady=10)
+
+            root.wait_window(preview)
+
+            if resultado["mover"]:
+                destino = os.path.join(CARPETA_PERSONAJES, var.get())
+                if not os.path.exists(destino):
+                    os.makedirs(destino)
+                shutil.move(archivo, os.path.join(destino, os.path.basename(archivo)))
+                moved_count += 1
+
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo mostrar la imagen:\n{e}")
+
+    messagebox.showinfo("Proceso completado", f"✅ {moved_count} imagen(es) movida(s).")
 
 
 
-
-        
+    
 
 def mover_imagen_manual():
     archivos = filedialog.askopenfilenames(
